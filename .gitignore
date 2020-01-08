@@ -1,0 +1,13 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Java template
+*.class
+
+*.jar
+
+target/
+
+src/main/resources/
+.project
+.classpath
+
+.settings/
