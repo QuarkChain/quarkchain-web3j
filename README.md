@@ -42,5 +42,3 @@ See [here](/src/sample/sample/Sample.java) for more examples.
 See [JSON-RPC documentation](https://developers.quarkchain.io/#json-rpc) for API references.
 
 
- 
- 
