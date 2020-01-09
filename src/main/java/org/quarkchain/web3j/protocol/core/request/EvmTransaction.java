@@ -164,9 +164,9 @@ public class EvmTransaction {
 		}
 	}
 
-	public static EvmTransaction createQKCThansferTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit,
-			String to, BigInteger value, String networkid, BigInteger fromfullshardkey, BigInteger tofullshardkey,
-			String transferTokenID, String gasTokenID) {
+	public static EvmTransaction createQKCThansferTransaction(BigInteger nonce, BigInteger gasPrice,
+			BigInteger gasLimit, String to, BigInteger value, String networkid, BigInteger fromfullshardkey,
+			BigInteger tofullshardkey, String transferTokenID, String gasTokenID) {
 		TxData txData = new TxData(nonce, gasPrice, gasLimit, to, value, "", networkid, fromfullshardkey,
 				tofullshardkey, transferTokenID, gasTokenID);
 		EvmTransaction evmTx = new EvmTransaction();
@@ -174,11 +174,23 @@ public class EvmTransaction {
 		return evmTx;
 	}
 
-	public static EvmTransaction createSmartContractTransaction(BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit,
-			String networkid, BigInteger fromfullshardkey, BigInteger tofullshardkey,
+	public static EvmTransaction createSmartContractTransaction(BigInteger nonce, BigInteger gasPrice,
+			BigInteger gasLimit, String networkid, BigInteger fromfullshardkey, BigInteger tofullshardkey,
 			String transferTokenID, String gasTokenID, String contractBytecode) {
 
-		TxData txData = new TxData(nonce, gasPrice, gasLimit, "",BigInteger.ZERO, contractBytecode, networkid, fromfullshardkey,
+		TxData txData = new TxData(nonce, gasPrice, gasLimit, "", BigInteger.ZERO, contractBytecode, networkid,
+				fromfullshardkey, tofullshardkey, transferTokenID, gasTokenID);
+		EvmTransaction evmTx = new EvmTransaction();
+		evmTx.data = txData;
+		return evmTx;
+	}
+
+	public static EvmTransaction createSmartContractFunctionCallTransaction(BigInteger nonce, BigInteger gasPrice,
+			BigInteger gasLimit, String contractAddress, BigInteger value, String networkid,
+			BigInteger fromfullshardkey, BigInteger tofullshardkey, String transferTokenID, String gasTokenID,
+			String data) {
+
+		TxData txData = new TxData(nonce, gasPrice, gasLimit, contractAddress, value, data, networkid, fromfullshardkey,
 				tofullshardkey, transferTokenID, gasTokenID);
 		EvmTransaction evmTx = new EvmTransaction();
 		evmTx.data = txData;

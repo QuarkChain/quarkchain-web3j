@@ -35,7 +35,7 @@ NetworkInfo network = web3.networkInfo().send();
 Info networkInfo = network.getResult();
 
 ```
-See [here](/src/sample/sample/Sample.java) for more examples.
+See [here](https://github.com/QuarkChain/quarkchain-web3j/blob/master/src/sample/java/org/quarkchain/web3j/sample/Sample.java) for more examples.
 
 ## APIs
 

@@ -1,7 +1,5 @@
 package org.quarkchain.web3j.protocol.core.request;
 
-import java.math.BigInteger;
-
 import org.quarkchain.web3j.utils.Numeric;
 
 import com.fasterxml.jackson.annotation.JsonInclude;

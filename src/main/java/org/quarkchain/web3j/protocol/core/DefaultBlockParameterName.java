@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
  */
 public enum DefaultBlockParameterName implements DefaultBlockParameter {
-	LATEST("latest"), PENDING("pending");
+	LATEST("latest"), PENDING("pending"), EARLIEST("earliest");
 
 	private String name;
 

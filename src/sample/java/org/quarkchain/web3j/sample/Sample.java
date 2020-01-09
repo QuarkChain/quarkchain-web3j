@@ -9,6 +9,7 @@ import org.quarkchain.web3j.crypto.TransactionEncoder;
 import org.quarkchain.web3j.protocol.HttpService;
 import org.quarkchain.web3j.protocol.Web3j;
 import org.quarkchain.web3j.protocol.core.DefaultBlockParameterName;
+import org.quarkchain.web3j.protocol.core.Response.Error;
 import org.quarkchain.web3j.protocol.core.request.EvmTransaction;
 import org.quarkchain.web3j.protocol.core.request.TransactionReq;
 import org.quarkchain.web3j.protocol.core.response.Call;
@@ -124,6 +125,42 @@ public class Sample {
 		throw new Exception("err:" + call.getError().getMessage());
 	}
 
+	private static String execSmartContractFunction(Web3j web3, String address, BigInteger amount) throws Exception {
+		GetTransactionCount getTransactionCount = web3.getTransactionCount(FROM_ADDRESS).sendAsync().get();
+		BigInteger nonce = getTransactionCount.getTransactionCount();
+
+		NetworkInfo network = web3.networkInfo().send();
+		Info networkInfo = network.getResult();
+		String networkId = networkInfo.getNetworkId();
+
+		String data = TransactionHelper.buildMethodId("transfer(address,uint256)");
+		BigInteger addrBI = new BigInteger(Numeric.hexStringToByteArray(TO_ADDRESS.substring(0, 42)));
+		byte[] input0 = Numeric.toBytesPadded(addrBI, 32);
+		String param0 = Numeric.toHexString(input0, 0, input0.length, false);
+		byte[] input1 = Numeric.toBytesPadded(amount, 32);
+		String param1 = Numeric.toHexString(input1, 0, input1.length, false);
+		data = data + param0 + param1;
+		System.out.println("data=" + data);
+
+		BigInteger fullShardKey = BigInteger.ZERO;
+		EvmTransaction evmTransaction = EvmTransaction.createSmartContractFunctionCallTransaction(nonce, GAS_PRICE,
+				GAS_LIMIT, address, BigInteger.ZERO, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID,
+				DEFAULT_TOKEN_ID, data);
+		evmTransaction.Sign(KEY_PAIR);
+		System.out.println("EvmTransaction=" + evmTransaction);
+		byte[] signedMessage = TransactionEncoder.encode(evmTransaction);
+		String hexValue = Numeric.toHexString(signedMessage);
+		SendTransaction ethSendTransaction = web3.sendRawTransaction(hexValue).sendAsync().get();
+		Error err = ethSendTransaction.getError();
+		if (err != null) {
+			throw new Exception(err.getData());
+		}
+		String transactionId = ethSendTransaction.getTransactionID();
+		TransactionHelper helper = new TransactionHelper(web3);
+		GetTransactionReceipt.TransactionReceipt transactionReceipt = helper.waitForTransactionReceipt(transactionId);
+		return transactionReceipt.getStatus();
+	}
+
 	public static void main(String[] args) throws Exception {
 		System.out.println("Connecting to Quarkchain ...");
 		Web3j web3 = Web3j.build(new HttpService(URL));
@@ -160,10 +197,12 @@ public class Sample {
 		String totalSupplyParam = Numeric.toHexString(totalSupply, 0, totalSupply.length, false);
 		String address = deploySmartContract(web3, totalSupplyParam);
 
-		// call
-		BigInteger blc = callSmartContract(web3, address);
-		System.out.println("balanceOf " + FROM_ADDRESS + ":" + blc);
+		String status = execSmartContractFunction(web3, address.substring(0, 42), BigInteger.TEN);
+		System.out.println("status=" + status);
 
+		// call
+		BigInteger blc1 = callSmartContract(web3, address);
+		System.out.println("balanceOf " + FROM_ADDRESS + ":" + blc1);
 		System.out.println("All set!");
 	}
 }

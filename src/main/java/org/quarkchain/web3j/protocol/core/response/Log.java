@@ -20,7 +20,9 @@ public class Log {
     private String transactionHash;
     private String blockHash;
     private String blockNumber;
+    private String blockHeight;
     private String address;
+    private String recipient;
     private String data;
     private String type;
     private List<String> topics;
@@ -169,4 +171,20 @@ public class Log {
         result = 31 * result + (topics != null ? topics.hashCode() : 0);
         return result;
     }
+
+	public String getBlockHeight() {
+		return blockHeight;
+	}
+
+	public void setBlockHeight(String blockHeight) {
+		this.blockHeight = blockHeight;
+	}
+
+	public String getRecipient() {
+		return recipient;
+	}
+
+	public void setRecipient(String recipient) {
+		this.recipient = recipient;
+	}
 }
