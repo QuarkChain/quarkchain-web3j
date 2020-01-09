@@ -15,18 +15,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.quarkchain.web3j.protocol.ObjectMapperFactory;
 import org.quarkchain.web3j.protocol.core.Response;
 
-/**
- * Log object returned by:
- * <ul>
- * <li>eth_getFilterChanges</li>
- * <li>eth_getFilterLogs</li>
- * <li>eth_getLogs</li>
- * </ul>
- *
- * <p>See
- * <a href="https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getfilterchanges">docs</a>
- * for further details.</p>
- */
 public class EthLog extends Response<List<EthLog.LogResult>> {
 
     @Override
