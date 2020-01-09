@@ -66,4 +66,10 @@ public class TransactionHelper {
 		byte[] hash = Hash.sha3(input);
 		return Numeric.toHexString(hash).substring(0, 10);
 	}
+
+	public static String encodeEvent(String methodSignature) {
+		byte[] input = methodSignature.getBytes();
+		byte[] hash = Hash.sha3(input);
+		return Numeric.toHexString(hash);
+	}
 }

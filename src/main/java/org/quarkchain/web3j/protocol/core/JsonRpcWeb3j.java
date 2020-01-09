@@ -117,8 +117,8 @@ public class JsonRpcWeb3j implements Web3j {
 	}
 
 	@Override
-	public Request<?, EthLog> getLogs(EthFilter ethFilter) {
-		return new Request<>("getLogs", Arrays.asList(ethFilter), ID, web3jService, EthLog.class);
+	public Request<?, EthLog> getLogs(EthFilter ethFilter, String fullShardKey) {
+		return new Request<>("getLogs", Arrays.asList(ethFilter, fullShardKey), ID, web3jService, EthLog.class);
 	}
 
 	@Override

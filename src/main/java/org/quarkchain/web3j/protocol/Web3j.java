@@ -60,6 +60,6 @@ public interface Web3j {
 
 	Request<?, GetTransactionReceipt> getTransactionReceipt(String transactionHash);
 
-	Request<?, EthLog> getLogs(EthFilter ethFilter);
+	Request<?, EthLog> getLogs(EthFilter ethFilter, String fullShardKey);
 
 }
