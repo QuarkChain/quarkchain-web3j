@@ -43,7 +43,7 @@ public class HttpService implements Web3jService {
 
 		byte[] payload = objectMapper.writeValueAsBytes(request);
 		String payloadS = objectMapper.writeValueAsString(request);
-		System.out.println("payloadS=" + payloadS);
+		System.out.println("payload=" + payloadS);
 		HttpPost httpPost = new HttpPost(this.url);
 		httpPost.setEntity(new ByteArrayEntity(payload));
 		httpPost.setHeader("Content-Type", "application/json; charset=UTF-8");

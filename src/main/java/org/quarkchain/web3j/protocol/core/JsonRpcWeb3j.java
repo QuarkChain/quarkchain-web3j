@@ -4,26 +4,27 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 
-import javax.swing.text.html.InlineView;
-
 import org.quarkchain.web3j.protocol.Web3j;
 import org.quarkchain.web3j.protocol.Web3jService;
 import org.quarkchain.web3j.protocol.core.request.EthFilter;
 import org.quarkchain.web3j.protocol.core.request.TransactionReq;
+import org.quarkchain.web3j.protocol.core.request.TxData;
+import org.quarkchain.web3j.protocol.core.response.Call;
 import org.quarkchain.web3j.protocol.core.response.EstimateGas;
 import org.quarkchain.web3j.protocol.core.response.EthLog;
 import org.quarkchain.web3j.protocol.core.response.EthTransaction;
 import org.quarkchain.web3j.protocol.core.response.GasPrice;
 import org.quarkchain.web3j.protocol.core.response.GetAccountData;
 import org.quarkchain.web3j.protocol.core.response.GetBalances;
+import org.quarkchain.web3j.protocol.core.response.GetMinorBlock;
+import org.quarkchain.web3j.protocol.core.response.GetRootBlock;
+import org.quarkchain.web3j.protocol.core.response.GetRootHashConfirmingMinorBlockById;
+import org.quarkchain.web3j.protocol.core.response.GetTransactionConfirmedByNumberRootBlocks;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionCount;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionReceipt;
-import org.quarkchain.web3j.protocol.core.response.GetMinorBlock;
 import org.quarkchain.web3j.protocol.core.response.NetworkInfo;
-import org.quarkchain.web3j.protocol.core.response.GetRootBlock;
 import org.quarkchain.web3j.protocol.core.response.SendTransaction;
 import org.quarkchain.web3j.utils.Numeric;
-import org.quarkchain.web3j.protocol.core.response.Call;
 
 /**
  * JSON-RPC 2.0 factory implementation.
@@ -126,6 +127,19 @@ public class JsonRpcWeb3j implements Web3j {
 			boolean includeOtherShards) {
 		return new Request<>("getAccountData", Arrays.asList(address, defaultBlockParameter, includeOtherShards), ID,
 				web3jService, GetAccountData.class);
+	}
+
+	@Override
+	public Request<?, GetRootHashConfirmingMinorBlockById> getRootHashConfirmingMinorBlockById(String minorBlockId) {
+		return new Request<>("getRootHashConfirmingMinorBlockById", Arrays.asList(minorBlockId), ID, web3jService,
+				GetRootHashConfirmingMinorBlockById.class);
+	}
+
+	@Override
+	public Request<?, GetTransactionConfirmedByNumberRootBlocks> getTransactionConfirmedByNumberRootBlocks(
+			String transactionId) {
+		return new Request<>("getTransactionConfirmedByNumberRootBlocks", Arrays.asList(transactionId), ID,
+				web3jService, GetTransactionConfirmedByNumberRootBlocks.class);
 	}
 
 }

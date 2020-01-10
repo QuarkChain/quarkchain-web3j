@@ -14,11 +14,13 @@ import org.quarkchain.web3j.protocol.core.response.EthTransaction;
 import org.quarkchain.web3j.protocol.core.response.GasPrice;
 import org.quarkchain.web3j.protocol.core.response.GetAccountData;
 import org.quarkchain.web3j.protocol.core.response.GetBalances;
+import org.quarkchain.web3j.protocol.core.response.GetMinorBlock;
+import org.quarkchain.web3j.protocol.core.response.GetRootBlock;
+import org.quarkchain.web3j.protocol.core.response.GetRootHashConfirmingMinorBlockById;
+import org.quarkchain.web3j.protocol.core.response.GetTransactionConfirmedByNumberRootBlocks;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionCount;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionReceipt;
-import org.quarkchain.web3j.protocol.core.response.GetMinorBlock;
 import org.quarkchain.web3j.protocol.core.response.NetworkInfo;
-import org.quarkchain.web3j.protocol.core.response.GetRootBlock;
 import org.quarkchain.web3j.protocol.core.response.SendTransaction;
 
 /**
@@ -38,6 +40,7 @@ public interface Web3j {
 	Request<?, GetAccountData> getAccountData(String address, DefaultBlockParameter defaultBlockParameter,
 			boolean includeOtherShards);
 
+	// does not work for python node
 	Request<?, SendTransaction> sendTransaction(TransactionReq transaction);
 
 	Request<?, SendTransaction> sendRawTransaction(String signedTransactionData);
@@ -61,5 +64,11 @@ public interface Web3j {
 	Request<?, GetTransactionReceipt> getTransactionReceipt(String transactionHash);
 
 	Request<?, EthLog> getLogs(EthFilter ethFilter, String fullShardKey);
+
+	//works when "ENABLE_TRANSACTION_HISTORY": true,
+	Request<?, GetRootHashConfirmingMinorBlockById> getRootHashConfirmingMinorBlockById(String minorBlockId);
+
+	Request<?, GetTransactionConfirmedByNumberRootBlocks> getTransactionConfirmedByNumberRootBlocks(
+			String transactionId);
 
 }
