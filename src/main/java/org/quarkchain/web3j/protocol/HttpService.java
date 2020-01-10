@@ -59,18 +59,17 @@ public class HttpService implements Web3jService {
 	public <T> ResponseHandler<T> getResponseHandler(Class<T> type) {
 		return response -> {
 			int status = response.getStatusLine().getStatusCode();
-			if (status >= 200 && status < 300) {
+//			if (status >= 200 && status < 800) {
 				HttpEntity entity = response.getEntity();
 
 				if (entity != null) {
-//                	System.out.println("response.getEntity().getContent()",response.getEntity().getContent().);
 					return objectMapper.readValue(response.getEntity().getContent(), type);
 				} else {
 					return null;
 				}
-			} else {
-				throw new ClientProtocolException("Unexpected response status: " + status);
-			}
+//			} else {
+//				throw new ClientProtocolException("Unexpected response status: " + status + ":" + response.getStatusLine().getReasonPhrase());
+//			}
 		};
 	}
 

@@ -2,6 +2,7 @@ package org.quarkchain.web3j.sample;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.quarkchain.web3j.crypto.ECKeyPair;
@@ -15,6 +16,7 @@ import org.quarkchain.web3j.protocol.core.request.EvmTransaction;
 import org.quarkchain.web3j.protocol.core.request.TransactionReq;
 import org.quarkchain.web3j.protocol.core.response.Call;
 import org.quarkchain.web3j.protocol.core.response.EthLog;
+import org.quarkchain.web3j.protocol.core.response.EthLog.LogResult;
 import org.quarkchain.web3j.protocol.core.response.GetBalances;
 import org.quarkchain.web3j.protocol.core.response.GetBalances.Balance;
 import org.quarkchain.web3j.protocol.core.response.GetMinorBlock;
@@ -22,6 +24,7 @@ import org.quarkchain.web3j.protocol.core.response.GetRootBlock;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionCount;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionReceipt;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionReceipt.TransactionReceipt;
+import org.quarkchain.web3j.protocol.core.response.Log;
 import org.quarkchain.web3j.protocol.core.response.NetworkInfo;
 import org.quarkchain.web3j.protocol.core.response.NetworkInfo.Info;
 import org.quarkchain.web3j.protocol.core.response.SendTransaction;
@@ -30,7 +33,7 @@ import org.quarkchain.web3j.utils.Numeric;
 
 public class Sample {
 	public static final String URL = "http://localhost:38391";
-//	public static final String URL =  "http://jrpc.devnet.quarkchain.io:38391";
+//	public static final String URL = "http://jrpc.devnet.quarkchain.io:38391";
 
 	// 32 byte hex value
 	public static final String PRIVATE_KEY = "ca0143c9aa51c3013f08e83f3b6368a4f3ba5b52c4841c6e0c22c300f7ee6827";
@@ -68,7 +71,13 @@ public class Sample {
 		byte[] signedMessage = TransactionEncoder.encode(evmTransaction);
 		String hexValue = Numeric.toHexString(signedMessage);
 		SendTransaction ethSendTransaction = devnet.sendRawTransaction(hexValue).sendAsync().get();
+		if (ethSendTransaction.getError() != null) {
+			throw new Exception(ethSendTransaction.getError().getMessage());
+		}
 		String transactionId = ethSendTransaction.getTransactionID();
+		if (Numeric.toBigInt(transactionId).equals(BigInteger.ZERO)) {
+			throw new Exception("transfer failed: probably insufficient balance");
+		}
 		TransactionHelper helper = new TransactionHelper(devnet);
 		GetTransactionReceipt.TransactionReceipt transactionReceipt = helper.waitForTransactionReceipt(transactionId);
 		return transactionReceipt;
@@ -165,6 +174,37 @@ public class Sample {
 		return transactionReceipt.getStatus();
 	}
 
+	private static List<String> getLogs(Web3j web3, String ethAddress) throws Exception {
+//		EthFilter ethFilter = new EthFilter();//devnet
+		EthFilter ethFilter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST,
+				ethAddress);
+
+		String encodedEvent = TransactionHelper.encodeEvent("Transfer(address,address,uint256)");
+		System.out.println("encodedEvent=" + encodedEvent);
+		ethFilter.addSingleTopic(encodedEvent);
+
+		EthLog ethLog = web3.getLogs(ethFilter, "0x0").send();
+
+		if (ethLog.getError() != null) {
+			throw new Exception(ethLog.getError().getMessage());
+		}
+		List<LogResult> logs = ethLog.getLogs();
+		System.out.println("logs=" + logs);
+		List<String> result = new ArrayList<String>();
+		for (LogResult log : logs) {
+			StringBuilder msg = new StringBuilder("transfered ");
+			Log l = (Log) log;
+			msg.append(Numeric.toBigInt(l.getData()));
+			msg.append("wei from ");
+			msg.append("0x" + l.getTopics().get(1).substring(26));
+			msg.append(" to ");
+			msg.append("0x" + l.getTopics().get(2).substring(26));
+			msg.append(". \n");
+			result.add(msg.toString());
+		}
+		return result;
+	}
+
 	public static void main(String[] args) throws Exception {
 		System.out.println("Connecting to Quarkchain ...");
 		Web3j web3 = Web3j.build(new HttpService(URL));
@@ -200,6 +240,8 @@ public class Sample {
 		byte[] totalSupply = Numeric.toBytesPadded(BigInteger.valueOf(2_000_000_000_000_000L), 32);
 		String totalSupplyParam = Numeric.toHexString(totalSupply, 0, totalSupply.length, false);
 		String address = deploySmartContract(web3, totalSupplyParam);
+
+		// exec transfer
 		String ethAddress = address.substring(0, 42);
 		String status = execSmartContractFunction(web3, ethAddress, BigInteger.TEN);
 		System.out.println("status=" + status);
@@ -208,17 +250,8 @@ public class Sample {
 		BigInteger blc1 = callSmartContract(web3, address);
 		System.out.println("balanceOf " + FROM_ADDRESS + ":" + blc1);
 
-		EthFilter ethFilter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST,
-				ethAddress);
-
-		String encodedEvent = TransactionHelper.encodeEvent("Transfer(address,address,uint256)");
-		System.out.println("encodedEvent=" + encodedEvent);
-		ethFilter.addSingleTopic(encodedEvent);
-
-		EthLog ethLog = web3.getLogs(ethFilter, "0x0").send();
- 
-		List<EthLog.LogResult> logs = ethLog.getLogs();
-		System.out.println("logs=" + logs);
+		List<String> logs = getLogs(web3, ethAddress);
+		System.out.println(logs);
 
 		System.out.println("All set!");
 	}
