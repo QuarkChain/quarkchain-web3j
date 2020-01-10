@@ -43,7 +43,7 @@ public class HttpService implements Web3jService {
 
 		byte[] payload = objectMapper.writeValueAsBytes(request);
 		String payloadS = objectMapper.writeValueAsString(request);
-		System.out.println("payloadS=" + payloadS);
+		System.out.println("payload=" + payloadS);
 		HttpPost httpPost = new HttpPost(this.url);
 		httpPost.setEntity(new ByteArrayEntity(payload));
 		httpPost.setHeader("Content-Type", "application/json; charset=UTF-8");
@@ -59,18 +59,17 @@ public class HttpService implements Web3jService {
 	public <T> ResponseHandler<T> getResponseHandler(Class<T> type) {
 		return response -> {
 			int status = response.getStatusLine().getStatusCode();
-			if (status >= 200 && status < 300) {
+//			if (status >= 200 && status < 800) {
 				HttpEntity entity = response.getEntity();
 
 				if (entity != null) {
-//                	System.out.println("response.getEntity().getContent()",response.getEntity().getContent().);
 					return objectMapper.readValue(response.getEntity().getContent(), type);
 				} else {
 					return null;
 				}
-			} else {
-				throw new ClientProtocolException("Unexpected response status: " + status);
-			}
+//			} else {
+//				throw new ClientProtocolException("Unexpected response status: " + status + ":" + response.getStatusLine().getReasonPhrase());
+//			}
 		};
 	}
 

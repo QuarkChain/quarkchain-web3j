@@ -2,6 +2,7 @@ package org.quarkchain.web3j.sample;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.quarkchain.web3j.crypto.ECKeyPair;
@@ -14,14 +15,19 @@ import org.quarkchain.web3j.protocol.core.request.EthFilter;
 import org.quarkchain.web3j.protocol.core.request.EvmTransaction;
 import org.quarkchain.web3j.protocol.core.request.TransactionReq;
 import org.quarkchain.web3j.protocol.core.response.Call;
+import org.quarkchain.web3j.protocol.core.response.EstimateGas;
 import org.quarkchain.web3j.protocol.core.response.EthLog;
+import org.quarkchain.web3j.protocol.core.response.EthLog.LogResult;
 import org.quarkchain.web3j.protocol.core.response.GetBalances;
 import org.quarkchain.web3j.protocol.core.response.GetBalances.Balance;
 import org.quarkchain.web3j.protocol.core.response.GetMinorBlock;
 import org.quarkchain.web3j.protocol.core.response.GetRootBlock;
+import org.quarkchain.web3j.protocol.core.response.GetRootHashConfirmingMinorBlockById;
+import org.quarkchain.web3j.protocol.core.response.GetTransactionConfirmedByNumberRootBlocks;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionCount;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionReceipt;
 import org.quarkchain.web3j.protocol.core.response.GetTransactionReceipt.TransactionReceipt;
+import org.quarkchain.web3j.protocol.core.response.Log;
 import org.quarkchain.web3j.protocol.core.response.NetworkInfo;
 import org.quarkchain.web3j.protocol.core.response.NetworkInfo.Info;
 import org.quarkchain.web3j.protocol.core.response.SendTransaction;
@@ -30,7 +36,7 @@ import org.quarkchain.web3j.utils.Numeric;
 
 public class Sample {
 	public static final String URL = "http://localhost:38391";
-//	public static final String URL =  "http://jrpc.devnet.quarkchain.io:38391";
+//	public static final String URL = "http://jrpc.devnet.quarkchain.io:38391";
 
 	// 32 byte hex value
 	public static final String PRIVATE_KEY = "ca0143c9aa51c3013f08e83f3b6368a4f3ba5b52c4841c6e0c22c300f7ee6827";
@@ -50,31 +56,37 @@ public class Sample {
 	public static final BigInteger GAS_PRICE = BigInteger.valueOf(10_000_000_000L);
 	public static final BigInteger GAS_LIMIT = BigInteger.valueOf(2_000_000);
 
-	public static TransactionReceipt transferQKC(Web3j devnet) throws Exception {
+	private static TransactionReceipt transferQKC(Web3j devnet) throws Exception {
 		GetTransactionCount getTransactionCount = devnet.getTransactionCount(FROM_ADDRESS).sendAsync().get();
 		BigInteger nonce = getTransactionCount.getTransactionCount();
 
 		NetworkInfo network = devnet.networkInfo().send();
 		Info networkInfo = network.getResult();
+		System.out.println("networkInfo=" + networkInfo);
 		String networkId = networkInfo.getNetworkId();
 
 		BigInteger fullShardKey = BigInteger.ZERO;
-		BigInteger value = Convert.toWei("1", Convert.Unit.ETHER).toBigInteger();
+		BigInteger value = Convert.toWei("0.01", Convert.Unit.ETHER).toBigInteger();
 		EvmTransaction evmTransaction = EvmTransaction.createQKCThansferTransaction(nonce, GAS_PRICE, GAS_LIMIT,
 				TO_ADDRESS, value, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID);
 
-		evmTransaction.Sign(KEY_PAIR);
-		System.out.println("EvmTransaction=" + evmTransaction);
+		evmTransaction.sign(KEY_PAIR);
 		byte[] signedMessage = TransactionEncoder.encode(evmTransaction);
 		String hexValue = Numeric.toHexString(signedMessage);
 		SendTransaction ethSendTransaction = devnet.sendRawTransaction(hexValue).sendAsync().get();
+		if (ethSendTransaction.getError() != null) {
+			throw new Exception(ethSendTransaction.getError().getMessage());
+		}
 		String transactionId = ethSendTransaction.getTransactionID();
+		if (Numeric.toBigInt(transactionId).equals(BigInteger.ZERO)) {
+			throw new Exception("transfer failed: probably insufficient balance");
+		}
 		TransactionHelper helper = new TransactionHelper(devnet);
 		GetTransactionReceipt.TransactionReceipt transactionReceipt = helper.waitForTransactionReceipt(transactionId);
 		return transactionReceipt;
 	}
 
-	public static String deploySmartContract(Web3j devnet, String params) throws Exception {
+	private static String deploySmartContract(Web3j devnet, String params) throws Exception {
 		GetTransactionCount getTransactionCount = devnet.getTransactionCount(FROM_ADDRESS).sendAsync().get();
 		BigInteger nonce = getTransactionCount.getTransactionCount();
 
@@ -84,15 +96,14 @@ public class Sample {
 		BigInteger fullShardKey = BigInteger.ZERO;
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractTransaction(nonce, GAS_PRICE, GAS_LIMIT,
 				networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID, CONTRACT_BYTECODE + params);
-		evmTransaction.Sign(KEY_PAIR);
-		System.out.println("EvmTransaction=" + evmTransaction);
+		evmTransaction.sign(KEY_PAIR);
 		byte[] signedMessage = TransactionEncoder.encode(evmTransaction);
 		String hexValue = Numeric.toHexString(signedMessage);
 		SendTransaction ethSendTransaction = devnet.sendRawTransaction(hexValue).sendAsync().get();
 		String transactionId = ethSendTransaction.getTransactionID();
 		TransactionHelper helper = new TransactionHelper(devnet);
 		GetTransactionReceipt.TransactionReceipt transactionReceipt = helper.waitForTransactionReceipt(transactionId);
-		System.out.println("status=" + transactionReceipt.getStatus());
+		System.out.println("deploySmartContract status=" + transactionReceipt.getStatus());
 		String address = transactionReceipt.getContractAddress().get();
 		System.out.println("contract address=" + address);
 		return address;
@@ -117,7 +128,6 @@ public class Sample {
 		byte[] input = Numeric.toBytesPadded(addrBI, 32);
 		String params = Numeric.toHexString(input, 0, input.length, false);
 		data += params;
-		System.out.println("data=" + data);
 		TransactionReq tx = new TransactionReq(FROM_ADDRESS, address, Numeric.toHexStringWithPrefix(GAS_LIMIT),
 				Numeric.toHexStringWithPrefix(GAS_PRICE), "0x0", data, DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID);
 		Call call = web3.call(tx, DefaultBlockParameterName.LATEST).sendAsync().get();
@@ -149,20 +159,56 @@ public class Sample {
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractFunctionCallTransaction(nonce, GAS_PRICE,
 				GAS_LIMIT, address, BigInteger.ZERO, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID,
 				DEFAULT_TOKEN_ID, data);
-		evmTransaction.Sign(KEY_PAIR);
-		System.out.println("EvmTransaction=" + evmTransaction);
-		byte[] signedMessage = TransactionEncoder.encode(evmTransaction);
-		String hexValue = Numeric.toHexString(signedMessage);
-		SendTransaction ethSendTransaction = web3.sendRawTransaction(hexValue).sendAsync().get();
+		TransactionReq td = evmTransaction.getSignedTx(KEY_PAIR);
+		SendTransaction ethSendTransaction = web3.sendTransaction(td).sendAsync().get();
 		Error err = ethSendTransaction.getError();
 		if (err != null) {
-			throw new Exception(err.getData());
+			throw new Exception(err.getMessage());
 		}
 		String transactionId = ethSendTransaction.getTransactionID();
 		TransactionHelper helper = new TransactionHelper(web3);
 		GetTransactionReceipt.TransactionReceipt transactionReceipt = helper.waitForTransactionReceipt(transactionId);
 		System.out.println("call transfer done: " + transactionReceipt);
 		return transactionReceipt.getStatus();
+	}
+
+	private static List<String> getLogs(Web3j web3, String ethAddress) throws Exception {
+//		EthFilter ethFilter = new EthFilter();//devnet
+		EthFilter ethFilter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST,
+				ethAddress);
+		String encodedEvent = TransactionHelper.encodeEvent("Transfer(address,address,uint256)");
+		ethFilter.addSingleTopic(encodedEvent);
+		EthLog ethLog = web3.getLogs(ethFilter, "0x0").send();
+		if (ethLog.getError() != null) {
+			throw new Exception(ethLog.getError().getMessage());
+		}
+		List<LogResult> logs = ethLog.getLogs();
+		List<String> result = new ArrayList<String>();
+		for (LogResult log : logs) {
+			StringBuilder msg = new StringBuilder("transfered ");
+			Log l = (Log) log;
+			msg.append(Numeric.toBigInt(l.getData()));
+			msg.append(" wei from ");
+			msg.append("0x" + l.getTopics().get(1).substring(26));
+			msg.append(" to ");
+			msg.append("0x" + l.getTopics().get(2).substring(26));
+			msg.append(". \n");
+			result.add(msg.toString());
+		}
+		return result;
+	}
+
+	private static void getConfirmedBlocks(Web3j web3, String txId) throws IOException {
+		GetTransactionConfirmedByNumberRootBlocks confirm = web3.getTransactionConfirmedByNumberRootBlocks(txId).send();
+
+		int blocks = confirm.getTxCount();
+		if (confirm.getError() != null) {
+			System.out.println("GetTransactionConfirmedByNumberRootBlocks failed:" + confirm.getError().getMessage());
+		} else if (blocks == -1) {
+			System.out.println("GetTransactionConfirmedByNumberRootBlocks failed: probably tx not found.");
+		} else {
+			System.out.println("The transferQKC tx has been confirmed by " + blocks + " root blocks.");
+		}
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -179,27 +225,43 @@ public class Sample {
 
 		// make sure FROM_ADDRESS has pre allocated QKC for tx tests.
 		BigInteger qkc = getQKCBalance(web3);
-		if (qkc == null || qkc.compareTo(BigInteger.ZERO) == 0) {
+		if (qkc == null || qkc.compareTo(BigInteger.ONE) == 0) {
 			System.out.println("Not enough QKC to continue!");
 			return;
 		}
+		// estimateGas
+		EstimateGas est = web3.estimateGas(
+				new TransactionReq(FROM_ADDRESS, TO_ADDRESS + "00000000", "", DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID))
+				.send();
+		BigInteger estGas = est.getAmountUsed();
+		System.out.println("Estimated gas=" + estGas);
 
 		// sendRawTransaction
 		TransactionReceipt transactionReceipt = transferQKC(web3);
-		System.out.println("status=" + transactionReceipt.getStatus());
+		System.out.println("transferQKC status=" + transactionReceipt.getStatus());
+
+		String txId = transactionReceipt.getTransactionId();
 
 		// getMinorBlockByHeight
-		String h = transactionReceipt.getBlockHeight();
+//		String h = transactionReceipt.getBlockHeight();
+		String h = "0x1";
 		GetMinorBlock mBlock = web3.getMinorBlockByHeight("0x00001", Numeric.toBigInt(h), true).send();
 		if (mBlock.getBlock().isPresent()) {
 			GetMinorBlock.MinorBlock block = mBlock.getBlock().get();
-			System.out.println("block=" + block);
+			System.out.println("getMinorBlockByHeight:" + block);
+			String mbid = block.getIdPrevMinorBlock();
+			GetRootHashConfirmingMinorBlockById confirmingRoot = web3.getRootHashConfirmingMinorBlockById(mbid).send();
+			String root = confirmingRoot.getRootHash();
+			System.out.println(
+					"getRootHashConfirmingMinorBlockById: root block " + root + " includes minor block " + mbid);
 		}
 
 		// deploy contract with constructor argument 2000000000000000
 		byte[] totalSupply = Numeric.toBytesPadded(BigInteger.valueOf(2_000_000_000_000_000L), 32);
 		String totalSupplyParam = Numeric.toHexString(totalSupply, 0, totalSupply.length, false);
 		String address = deploySmartContract(web3, totalSupplyParam);
+
+		// sendTransaction
 		String ethAddress = address.substring(0, 42);
 		String status = execSmartContractFunction(web3, ethAddress, BigInteger.TEN);
 		System.out.println("status=" + status);
@@ -208,18 +270,14 @@ public class Sample {
 		BigInteger blc1 = callSmartContract(web3, address);
 		System.out.println("balanceOf " + FROM_ADDRESS + ":" + blc1);
 
-		EthFilter ethFilter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST,
-				ethAddress);
+//		List<String> logs = getLogs(web3, ethAddress);
+//		System.out.println("log parsed:" + logs);
 
-		String encodedEvent = TransactionHelper.encodeEvent("Transfer(address,address,uint256)");
-		System.out.println("encodedEvent=" + encodedEvent);
-		ethFilter.addSingleTopic(encodedEvent);
-
-		EthLog ethLog = web3.getLogs(ethFilter, "0x0").send();
- 
-		List<EthLog.LogResult> logs = ethLog.getLogs();
-		System.out.println("logs=" + logs);
+//		String txId = "0xb3838875676d0aaaaaed93fea7c3214a324a924d15728a3064dca93666d92b8e00000000";// devnet
+//		String txId = "0x5f4994ed9592fb2a98d432194a6428057acee04ca02cab490128b2f3d76d06a600000000";
+//		getConfirmedBlocks(web3, txId);
 
 		System.out.println("All set!");
 	}
+
 }

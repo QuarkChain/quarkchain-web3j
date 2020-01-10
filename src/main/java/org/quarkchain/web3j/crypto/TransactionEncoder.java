@@ -56,8 +56,8 @@ public class TransactionEncoder {
 		// first
 		result.add(RlpString.create(Numeric.hexStringToByteArray(rawTransaction.getData())));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(rawTransaction.getNetworkid())));
-		result.add(RlpUint32.create(rawTransaction.getFromfullshardid()));
-		result.add(RlpUint32.create(rawTransaction.getTofullshardid()));
+		result.add(RlpUint32.create(rawTransaction.getFromFullShardId()));
+		result.add(RlpUint32.create(rawTransaction.getToFullShardId()));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(rawTransaction.getGasTokenID())));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(rawTransaction.getTransferTokenID())));
 		return result;
@@ -80,11 +80,11 @@ public class TransactionEncoder {
 		}
 		result.add(RlpString.create(txData.getValue()));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getInput())));
-		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getNetworkid())));
-		result.add(RlpUint32.create(txData.getFromfullshardkey()));
-		result.add(RlpUint32.create(txData.getTofullshardkey()));
-		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getGas_token_id())));
-		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getTransfer_token_id())));
+		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getNetworkId())));
+		result.add(RlpUint32.create(txData.getFromFullShardKey()));
+		result.add(RlpUint32.create(txData.getToFullShardKey()));
+		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getGasTokenId())));
+		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getTransferTokenId())));
 		result.add(RlpString.create(txData.getVersion()));
 		result.add(RlpString.create(txData.getV()));
 		result.add(RlpString.create(txData.getR()));
