@@ -1,7 +1,6 @@
 package org.quarkchain.web3j.sample;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.quarkchain.web3j.crypto.ECKeyPair;
@@ -14,7 +13,6 @@ public class TransactionHelper {
 
 	private static final int SLEEP_DURATION = 10000;
 	private static final int ATTEMPTS = 20;
-	private static final int MAX_BYTE_LENGTH = 32;
 	private Web3j web3j;
 
 	public TransactionHelper(Web3j web3j) {
@@ -73,8 +71,6 @@ public class TransactionHelper {
 		byte[] input = methodSignature.getBytes();
 		byte[] hash = Hash.sha3(input);
 		return Numeric.toHexString(hash);
-	} 
-	
-	
+	}
 
 }
