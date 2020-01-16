@@ -38,5 +38,11 @@
 			<version>1.54</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+		<!-- used by sample -->
+			<groupId>org.web3j</groupId>
+			<artifactId>core</artifactId>
+			<version>4.5.5</version>
+		</dependency>
 	</dependencies>
 </project>

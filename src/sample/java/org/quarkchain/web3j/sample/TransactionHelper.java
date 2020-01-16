@@ -72,4 +72,5 @@ public class TransactionHelper {
 		byte[] hash = Hash.sha3(input);
 		return Numeric.toHexString(hash);
 	}
+
 }
