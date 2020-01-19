@@ -40,9 +40,8 @@ public interface Web3j {
 	Request<?, GetAccountData> getAccountData(String address, DefaultBlockParameter defaultBlockParameter,
 			boolean includeOtherShards);
 
-	// does not work for python node
 	Request<?, SendTransaction> sendTransaction(TransactionReq transaction);
-
+	
 	Request<?, SendTransaction> sendRawTransaction(String signedTransactionData);
 
 	Request<?, Call> call(TransactionReq transaction, DefaultBlockParameter defaultBlockParameter);
@@ -51,7 +50,7 @@ public interface Web3j {
 
 	Request<?, GasPrice> gasPrice(String fullShardKey, String tokenID);
 
-	Request<?, GetMinorBlock> getMinorBlockByHeight(String fullShardId, BigInteger blockNumber, boolean withTx);
+	Request<?, GetMinorBlock> getMinorBlockByHeight(BigInteger fullShardId, BigInteger blockNumber, boolean withTx);
 
 	Request<?, GetMinorBlock> getMinorBlockById(String blockId, boolean withTx);
 

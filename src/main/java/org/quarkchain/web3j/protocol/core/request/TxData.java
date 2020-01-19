@@ -10,8 +10,8 @@ public class TxData {
 	private BigInteger value;
 	private String input;
 	private String networkId;
-	private BigInteger fromFullShardKey;
-	private BigInteger toFullShardKey;
+	private String fromFullShardKey;
+	private String toFullShardKey;
 	private String gasTokenId;
 	private String transferTokenId;
 	private BigInteger version = BigInteger.ZERO;
@@ -76,19 +76,19 @@ public class TxData {
 		this.networkId = networkId;
 	}
 
-	public BigInteger getFromFullShardKey() {
+	public String getFromFullShardKey() {
 		return fromFullShardKey;
 	}
 
-	public void setFromFullShardKey(BigInteger fromFullShardKey) {
+	public void setFromFullShardKey(String fromFullShardKey) {
 		this.fromFullShardKey = fromFullShardKey;
 	}
 
-	public BigInteger getToFullShardKey() {
+	public String getToFullShardKey() {
 		return toFullShardKey;
 	}
 
-	public void setToFullShardKey(BigInteger toFullShardKey) {
+	public void setToFullShardKey(String toFullShardKey) {
 		this.toFullShardKey = toFullShardKey;
 	}
 
@@ -149,7 +149,7 @@ public class TxData {
 	}
 
 	public TxData(BigInteger nonce, BigInteger gasPrice, BigInteger gas, String to, BigInteger value, String input,
-			String networkId, BigInteger fromFullShardKey, BigInteger toFullShardKey, String gasTokenId,
+			String networkId, String fromFullShardKey, String toFullShardKey, String gasTokenId,
 			String transferTokenId, BigInteger v, BigInteger r, BigInteger s) {
 		super();
 		this.nonce = nonce;
@@ -169,7 +169,7 @@ public class TxData {
 	}
 
 	public TxData(BigInteger nonce, BigInteger gasPrice, BigInteger gas, String to, BigInteger value, String input,
-			String networkId, BigInteger fromFullShardKey, BigInteger toFullShardKey, String transferTokenId,
+			String networkId, String fromfullshardkey, String tofullshardkey, String transferTokenId,
 			String gasTokenId) {
 		super();
 		this.nonce = nonce;
@@ -179,8 +179,8 @@ public class TxData {
 		this.value = value;
 		this.input = input;
 		this.networkId = networkId;
-		this.fromFullShardKey = fromFullShardKey;
-		this.toFullShardKey = toFullShardKey;
+		this.fromFullShardKey = fromfullshardkey;
+		this.toFullShardKey = tofullshardkey;
 		this.gasTokenId = gasTokenId;
 		this.transferTokenId = transferTokenId;
 	}
