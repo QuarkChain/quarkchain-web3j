@@ -74,7 +74,7 @@ public class Sample {
 		System.out.println("networkInfo=" + networkInfo);
 		String networkId = networkInfo.getNetworkId();
 
-		BigInteger fullShardKey = BigInteger.ZERO;
+		String fullShardKey = "0x00000000";
 		BigInteger value = Convert.toWei("0.01", Convert.Unit.ETHER).toBigInteger();
 		EvmTransaction evmTransaction = EvmTransaction.createQKCThansferTransaction(nonce, GAS_PRICE, GAS_LIMIT,
 				TO_ADDRESS, value, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID);
@@ -102,7 +102,7 @@ public class Sample {
 		NetworkInfo network = devnet.networkInfo().send();
 		Info networkInfo = network.getResult();
 		String networkId = networkInfo.getNetworkId();
-		BigInteger fullShardKey = BigInteger.ZERO;
+		String fullShardKey = "0x00000000";
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractTransaction(nonce, GAS_PRICE, GAS_LIMIT,
 				networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID, CONTRACT_BYTECODE + params);
 		evmTransaction.sign(KEY_PAIR);
@@ -162,9 +162,9 @@ public class Sample {
 		byte[] input1 = Numeric.toBytesPadded(amount, 32);
 		String param1 = Numeric.toHexString(input1, 0, input1.length, false);
 		data = data + param0 + param1;
-		System.out.println("data=" + data);
+		System.out.println("transfer() data=" + data);
 
-		BigInteger fullShardKey = BigInteger.ZERO;
+		String fullShardKey = "0x00000000";
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractFunctionCallTransaction(nonce, GAS_PRICE,
 				GAS_LIMIT, address, BigInteger.ZERO, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID,
 				DEFAULT_TOKEN_ID, data);
@@ -194,7 +194,7 @@ public class Sample {
 		String data = FunctionEncoder.encode(function);
 		System.out.println("setName data=" + data);
 
-		BigInteger fullShardKey = BigInteger.ZERO;
+		String fullShardKey = "0x00000000";
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractFunctionCallTransaction(nonce, GAS_PRICE,
 				GAS_LIMIT, address, BigInteger.ZERO, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID,
 				DEFAULT_TOKEN_ID, data);
@@ -226,10 +226,9 @@ public class Sample {
 		throw new Exception("err:" + call.getError().getMessage());
 	}
 
-	private static List<String> getLogs(Web3j web3, String ethAddress) throws Exception {
-//		EthFilter ethFilter = new EthFilter();//devnet
+	private static List<String> getLogs(Web3j web3, String qkcAddress) throws Exception {
 		EthFilter ethFilter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST,
-				ethAddress);
+				qkcAddress);
 		String encodedEvent = TransactionHelper.encodeEvent("Transfer(address,address,uint256)");
 		ethFilter.addSingleTopic(encodedEvent);
 		EthLog ethLog = web3.getLogs(ethFilter, "0x0").send();
@@ -266,7 +265,7 @@ public class Sample {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("Connecting to Quarkchain ...");
+		System.out.println("Connecting to Quarkchain: " + URL);
 		Web3j web3 = Web3j.build(new HttpService(URL));
 		System.out.println("Successfuly connected to Quarkchain");
 
@@ -285,30 +284,31 @@ public class Sample {
 		}
 
 		// estimateGas
-//		EstimateGas est = web3.estimateGas(
-//				new TransactionReq(FROM_ADDRESS, TO_ADDRESS + "00000000", "", DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID))
-//				.send();
-//		BigInteger estGas = est.getAmountUsed();
-//		System.out.println("Estimated gas=" + estGas);
+		EstimateGas est = web3.estimateGas(
+				new TransactionReq(FROM_ADDRESS, TO_ADDRESS + "00000000", "", DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID))
+				.send();
+		BigInteger estGas = est.getAmountUsed();
+		System.out.println("Estimated gas=" + estGas);
 
 		// sendRawTransaction
-//		TransactionReceipt transactionReceipt = transferQKC(web3);
-//		System.out.println("transferQKC status=" + transactionReceipt.getStatus());
-//		String txId = transactionReceipt.getTransactionId();
+		TransactionReceipt transactionReceipt = transferQKC(web3);
+		System.out.println("transferQKC status=" + transactionReceipt.getStatus());
+		String txId = transactionReceipt.getTransactionId();
 
 		// getMinorBlockByHeight
 //		String h = transactionReceipt.getBlockHeight();
-//		String h = "0x1";
-//		GetMinorBlock mBlock = web3.getMinorBlockByHeight("0x00001", Numeric.toBigInt(h), true).send();
-//		if (mBlock.getBlock().isPresent()) {
-//			GetMinorBlock.MinorBlock block = mBlock.getBlock().get();
-//			System.out.println("getMinorBlockByHeight:" + block);
-//			String mbid = block.getIdPrevMinorBlock();
-//			GetRootHashConfirmingMinorBlockById confirmingRoot = web3.getRootHashConfirmingMinorBlockById(mbid).send();
-//			String root = confirmingRoot.getRootHash();
-//			System.out.println(
-//					"getRootHashConfirmingMinorBlockById: root block " + root + " includes minor block " + mbid);
-//		}
+		String h = "0x1";
+		String fullShardIdHex = "0x1";
+		GetMinorBlock mBlock = web3.getMinorBlockByHeight(Numeric.toBigInt(fullShardIdHex), Numeric.toBigInt(h), true).send();
+		if (mBlock.getBlock().isPresent()) {
+			GetMinorBlock.MinorBlock block = mBlock.getBlock().get();
+			System.out.println("getMinorBlockByHeight:" + block);
+			String mbid = block.getIdPrevMinorBlock();
+			GetRootHashConfirmingMinorBlockById confirmingRoot = web3.getRootHashConfirmingMinorBlockById(mbid).send();
+			String root = confirmingRoot.getRootHash();
+			System.out.println(
+					"getRootHashConfirmingMinorBlockById: root block " + root + " includes minor block " + mbid);
+		}
 
 		// deploy contract with constructor argument 2000000000000000
 		byte[] totalSupply = Numeric.toBytesPadded(BigInteger.valueOf(2_000_000_000_000_000L), 32);
@@ -317,24 +317,22 @@ public class Sample {
 
 		// sendTransaction
 		String ethAddress = address.substring(0, 42);
-//		String status = execSmartContractFunction(web3, ethAddress, BigInteger.TEN);
-//		System.out.println("status=" + status);
+		String status = execSmartContractFunction(web3, ethAddress, BigInteger.TEN);
+		System.out.println("status=" + status);
 
 		String status1 = execSmartContractFunctionSetName(web3, ethAddress, "NewToken");
 		System.out.println("status=" + status1);
 
 		// call
-//		BigInteger blc1 = callSmartContract(web3, address);
-//		System.out.println("balanceOf " + FROM_ADDRESS + ":" + blc1);
+		BigInteger blc1 = callSmartContract(web3, address);
+		System.out.println("balanceOf " + FROM_ADDRESS + ":" + blc1);
 
 		System.out.println("new name is now " + callSmartContractGetName(web3, address));
 
-		List<String> logs = getLogs(web3, ethAddress);
+		List<String> logs = getLogs(web3, address);
 		System.out.println("log parsed:" + logs);
 
-//		String txId = "0xb3838875676d0aaaaaed93fea7c3214a324a924d15728a3064dca93666d92b8e00000000";// devnet
-//		String txId = "0x5f4994ed9592fb2a98d432194a6428057acee04ca02cab490128b2f3d76d06a600000000";
-//		getConfirmedBlocks(web3, txId);
+		getConfirmedBlocks(web3, txId);
 
 		System.out.println("All set!");
 	}

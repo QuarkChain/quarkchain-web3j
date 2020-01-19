@@ -83,9 +83,8 @@ public class JsonRpcWeb3j implements Web3j {
 
 	@Override
 	public Request<?, GetRootBlock> getRootBlockByHeight(BigInteger blockNumber) {
-		if (blockNumber == null ) {
-			return new Request<>("getRootBlockByHeight", Arrays.asList(), ID,
-					web3jService, GetRootBlock.class);
+		if (blockNumber == null) {
+			return new Request<>("getRootBlockByHeight", Arrays.asList(), ID, web3jService, GetRootBlock.class);
 		}
 		return new Request<>("getRootBlockByHeight", Arrays.asList(Numeric.toHexStringWithPrefix(blockNumber)), ID,
 				web3jService, GetRootBlock.class);
@@ -97,10 +96,9 @@ public class JsonRpcWeb3j implements Web3j {
 	}
 
 	@Override
-	public Request<?, GetMinorBlock> getMinorBlockByHeight(String fullShardId, BigInteger blockNumber, boolean withTx) {
-		if (blockNumber == null ) {
-			return new Request<>("getMinorBlockByHeight",
-					Arrays.asList(fullShardId, null, withTx), ID, web3jService,
+	public Request<?, GetMinorBlock> getMinorBlockByHeight(BigInteger fullShardId, BigInteger blockNumber, boolean withTx) { 
+		if (blockNumber == null) {
+			return new Request<>("getMinorBlockByHeight", Arrays.asList(fullShardId, null, withTx), ID, web3jService,
 					GetMinorBlock.class);
 		}
 		return new Request<>("getMinorBlockByHeight",

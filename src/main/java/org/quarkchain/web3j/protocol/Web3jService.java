@@ -10,9 +10,7 @@ import org.quarkchain.web3j.protocol.core.Response;
  * Services API.
  */
 public interface Web3jService {
-    <T extends Response> T send(
-            Request request, Class<T> responseType) throws IOException;
+	<T extends Response> T send(Request request, Class<T> responseType) throws IOException;
 
-    <T extends Response> CompletableFuture<T> sendAsync(
-            Request request, Class<T> responseType);
+	<T extends Response> CompletableFuture<T> sendAsync(Request request, Class<T> responseType);
 }

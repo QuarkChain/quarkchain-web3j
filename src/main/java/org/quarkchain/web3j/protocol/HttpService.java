@@ -3,9 +3,7 @@ package org.quarkchain.web3j.protocol;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
@@ -13,6 +11,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.quarkchain.web3j.protocol.core.Request;
 import org.quarkchain.web3j.protocol.core.Response;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HTTP implementation of our services API.
@@ -60,13 +60,13 @@ public class HttpService implements Web3jService {
 		return response -> {
 			int status = response.getStatusLine().getStatusCode();
 //			if (status >= 200 && status < 800) {
-				HttpEntity entity = response.getEntity();
+			HttpEntity entity = response.getEntity();
 
-				if (entity != null) {
-					return objectMapper.readValue(response.getEntity().getContent(), type);
-				} else {
-					return null;
-				}
+			if (entity != null) {
+				return objectMapper.readValue(response.getEntity().getContent(), type);
+			} else {
+				return null;
+			}
 //			} else {
 //				throw new ClientProtocolException("Unexpected response status: " + status + ":" + response.getStatusLine().getReasonPhrase());
 //			}

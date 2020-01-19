@@ -41,14 +41,14 @@ public class EvmTransaction {
 		private BigInteger value;
 		private String input;
 		private String networkId;
-		private BigInteger fromFullShardId;
-		private BigInteger toFullShardId;
+		private String fromFullShardKey;
+		private String toFullShardKey;
 		private String gasTokenID;
 		private String transferTokenID;
 
 		private TxDataUnsigned(BigInteger nonce, BigInteger gasPrice, BigInteger gas, String to, BigInteger value,
-				String input, String networkId, BigInteger fromFullShardId, BigInteger toFullShardId,
-				String transferTokenID, String gasTokenID) {
+				String input, String networkId, String fromFullShardKey, String toFullShardKey, String transferTokenID,
+				String gasTokenID) {
 			super();
 
 			this.nonce = nonce;
@@ -60,8 +60,8 @@ public class EvmTransaction {
 				this.input = Numeric.cleanHexPrefix(input);
 			}
 			this.networkId = networkId;
-			this.fromFullShardId = fromFullShardId;
-			this.toFullShardId = toFullShardId;
+			this.fromFullShardKey = fromFullShardKey;
+			this.toFullShardKey = toFullShardKey;
 			this.gasTokenID = gasTokenID;
 			this.transferTokenID = transferTokenID;
 
@@ -131,20 +131,20 @@ public class EvmTransaction {
 			this.input = input;
 		}
 
-		public BigInteger getFromFullShardId() {
-			return fromFullShardId;
+		public String getFromFullShardKey() {
+			return fromFullShardKey;
 		}
 
-		public void setFromFullShardId(BigInteger fromFullShardId) {
-			this.fromFullShardId = fromFullShardId;
+		public void setFromFullShardKey(String fromFullShardKey) {
+			this.fromFullShardKey = fromFullShardKey;
 		}
 
-		public BigInteger getToFullShardId() {
-			return toFullShardId;
+		public String getToFullShardKey() {
+			return toFullShardKey;
 		}
 
-		public void setToFullShardId(BigInteger toFullShardId) {
-			this.toFullShardId = toFullShardId;
+		public void setToFullShardKey(String toFullShardKey) {
+			this.toFullShardKey = toFullShardKey;
 		}
 
 		public String getGasTokenID() {
@@ -165,33 +165,31 @@ public class EvmTransaction {
 	}
 
 	public static EvmTransaction createQKCThansferTransaction(BigInteger nonce, BigInteger gasPrice,
-			BigInteger gasLimit, String to, BigInteger value, String networkId, BigInteger fromfullshardkey,
-			BigInteger tofullshardkey, String transferTokenID, String gasTokenID) {
-		TxData txData = new TxData(nonce, gasPrice, gasLimit, to, value, "", networkId, fromfullshardkey,
-				tofullshardkey, transferTokenID, gasTokenID);
+			BigInteger gasLimit, String to, BigInteger value, String networkId, String fromFullShardKey,
+			String toFullShardKey, String transferTokenID, String gasTokenID) {
+		TxData txData = new TxData(nonce, gasPrice, gasLimit, to, value, "", networkId, fromFullShardKey,
+				toFullShardKey, transferTokenID, gasTokenID);
 		EvmTransaction evmTx = new EvmTransaction();
 		evmTx.data = txData;
 		return evmTx;
 	}
 
 	public static EvmTransaction createSmartContractTransaction(BigInteger nonce, BigInteger gasPrice,
-			BigInteger gasLimit, String networkId, BigInteger fromfullshardkey, BigInteger tofullshardkey,
+			BigInteger gasLimit, String networkId, String fromFullShardKey, String toFullShardKey,
 			String transferTokenID, String gasTokenID, String contractBytecode) {
 
 		TxData txData = new TxData(nonce, gasPrice, gasLimit, "", BigInteger.ZERO, contractBytecode, networkId,
-				fromfullshardkey, tofullshardkey, transferTokenID, gasTokenID);
+				fromFullShardKey, toFullShardKey, transferTokenID, gasTokenID);
 		EvmTransaction evmTx = new EvmTransaction();
 		evmTx.data = txData;
 		return evmTx;
 	}
 
 	public static EvmTransaction createSmartContractFunctionCallTransaction(BigInteger nonce, BigInteger gasPrice,
-			BigInteger gasLimit, String contractAddress, BigInteger value, String networkId,
-			BigInteger fromfullshardkey, BigInteger tofullshardkey, String transferTokenID, String gasTokenID,
-			String data) {
-
-		TxData txData = new TxData(nonce, gasPrice, gasLimit, contractAddress, value, data, networkId, fromfullshardkey,
-				tofullshardkey, transferTokenID, gasTokenID);
+			BigInteger gasLimit, String contractAddress, BigInteger value, String networkId, String fullShardKeyFrom,
+			String fullShardKeyTo, String transferTokenID, String gasTokenID, String data) {
+		TxData txData = new TxData(nonce, gasPrice, gasLimit, contractAddress, value, data, networkId, fullShardKeyFrom,
+				fullShardKeyTo, transferTokenID, gasTokenID);
 		EvmTransaction evmTx = new EvmTransaction();
 		evmTx.data = txData;
 		return evmTx;
@@ -223,8 +221,8 @@ public class EvmTransaction {
 		tx.setGas(Numeric.toHexStringWithPrefix(txData.getGas()));
 		tx.setValue(Numeric.toHexStringWithPrefix(txData.getValue()));
 		tx.setData(txData.getInput());
-		tx.setFromFullShardKey((Numeric.toHexStringWithPrefix(txData.getFromFullShardKey())));
-		tx.setToFullShardKey((Numeric.toHexStringWithPrefix(txData.getToFullShardKey())));
+		tx.setFromFullShardKey((txData.getFromFullShardKey()));
+		tx.setToFullShardKey((txData.getToFullShardKey()));
 		tx.setNetworkId(txData.getNetworkId());
 		tx.setTo(txData.getTo());
 		tx.setGasTokenId(txData.getGasTokenId());

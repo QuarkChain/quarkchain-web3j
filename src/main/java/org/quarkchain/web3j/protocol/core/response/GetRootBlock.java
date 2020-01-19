@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.quarkchain.web3j.protocol.ObjectMapperFactory;
 import org.quarkchain.web3j.protocol.core.Response;
+import org.quarkchain.web3j.protocol.core.response.GetBalances.Balance;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -209,7 +210,50 @@ public class GetRootBlock extends Response<GetRootBlock.RootBlock> {
 		private List<GetRootBlock.MinorBlockHeader> minorBlockHeaders;
 		private String sealHash;
 		private String signature;
+		private String effectiveDifficulty;
+		private String poswMineableBlocks;
+		private String poswMinedBlocks;
+		private String stakingApplied;
 
+		public RootBlock() {
+		}
+
+		public RootBlock(String id, String hash, String height, String idPrevBlock, String hashPrevBlock, String nonce,
+				String hashMerkleRoot, String miner, List<Balance> coinbase, String difficulty, String timestamp,
+				String size, List<MinorBlockHeader> minorBlockHeaders, String sealHash, String signature,
+				String effectiveDifficulty, String poswMineableBlocks, String poswMinedBlocks, String stakingApplied) {
+			super();
+			this.id = id;
+			this.hash = hash;
+			this.height = height;
+			this.idPrevBlock = idPrevBlock;
+			this.hashPrevBlock = hashPrevBlock;
+			this.nonce = nonce;
+			this.hashMerkleRoot = hashMerkleRoot;
+			this.miner = miner;
+			this.coinbase = coinbase;
+			this.difficulty = difficulty;
+			this.timestamp = timestamp;
+			this.size = size;
+			this.minorBlockHeaders = minorBlockHeaders;
+			this.sealHash = sealHash;
+			this.signature = signature;
+			this.effectiveDifficulty = effectiveDifficulty;
+			this.poswMineableBlocks = poswMineableBlocks;
+			this.poswMinedBlocks = poswMinedBlocks;
+			this.stakingApplied = stakingApplied;
+		}
+
+		@Override
+		public String toString() {
+			return "RootBlock [id=" + id + ", hash=" + hash + ", height=" + height + ", idPrevBlock=" + idPrevBlock
+					+ ", hashPrevBlock=" + hashPrevBlock + ", nonce=" + nonce + ", hashMerkleRoot=" + hashMerkleRoot
+					+ ", miner=" + miner + ", coinbase=" + coinbase + ", difficulty=" + difficulty + ", timestamp="
+					+ timestamp + ", size=" + size + ", minorBlockHeaders=" + minorBlockHeaders + ", sealHash="
+					+ sealHash + ", signature=" + signature + ", effectiveDifficulty=" + effectiveDifficulty
+					+ ", poswMineableBlocks=" + poswMineableBlocks + ", poswMinedBlocks=" + poswMinedBlocks
+					+ ", stakingApplied=" + stakingApplied + "]";
+		}
 
 		public String getId() {
 			return id;
@@ -316,15 +360,36 @@ public class GetRootBlock extends Response<GetRootBlock.RootBlock> {
 			this.minorBlockHeaders = minorBlockHeaders;
 		}
 
-		public RootBlock() {
+		public String getEffectiveDifficulty() {
+			return effectiveDifficulty;
 		}
 
-		@Override
-		public String toString() {
-			return "RootBlock [id=" + id + ", hash=" + hash + ", height=" + height + ", idPrevBlock=" + idPrevBlock
-					+ ", hashPrevBlock=" + hashPrevBlock + ", nonce=" + nonce + ", hashMerkleRoot=" + hashMerkleRoot
-					+ ", miner=" + miner + ", coinbase=" + coinbase + ", difficulty=" + difficulty + ", timestamp="
-					+ timestamp + ", size=" + size + ", minorBlockHeaders=" + minorBlockHeaders + "]";
+		public void setEffectiveDifficulty(String effectiveDifficulty) {
+			this.effectiveDifficulty = effectiveDifficulty;
+		}
+
+		public String getPoswMineableBlocks() {
+			return poswMineableBlocks;
+		}
+
+		public void setPoswMineableBlocks(String poswMineableBlocks) {
+			this.poswMineableBlocks = poswMineableBlocks;
+		}
+
+		public String getPoswMinedBlocks() {
+			return poswMinedBlocks;
+		}
+
+		public void setPoswMinedBlocks(String poswMinedBlocks) {
+			this.poswMinedBlocks = poswMinedBlocks;
+		}
+
+		public String getStakingApplied() {
+			return stakingApplied;
+		}
+
+		public void setStakingApplied(String stakingApplied) {
+			this.stakingApplied = stakingApplied;
 		}
 
 		public String getSealHash() {
@@ -355,7 +420,9 @@ public class GetRootBlock extends Response<GetRootBlock.RootBlock> {
 
 			List<MinorBlockHeader> results = new ArrayList<>();
 			JsonToken nextToken = jsonParser.nextToken();
-
+			if (nextToken == JsonToken.END_ARRAY) {
+				return results;
+			}
 			Iterator<MinorBlockHeader> iterator = objectReader.readValues(jsonParser, MinorBlockHeader.class);
 			while (iterator.hasNext()) {
 				results.add(iterator.next());
