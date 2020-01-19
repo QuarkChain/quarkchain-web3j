@@ -231,7 +231,7 @@ public class Sample {
 				qkcAddress);
 		String encodedEvent = TransactionHelper.encodeEvent("Transfer(address,address,uint256)");
 		ethFilter.addSingleTopic(encodedEvent);
-		EthLog ethLog = web3.getLogs(ethFilter, "0x0").send();
+		EthLog ethLog = web3.getLogs(ethFilter, "0x00000000").send();
 		if (ethLog.getError() != null) {
 			throw new Exception(ethLog.getError().getMessage());
 		}
@@ -297,9 +297,8 @@ public class Sample {
 
 		// getMinorBlockByHeight
 //		String h = transactionReceipt.getBlockHeight();
-		String h = "0x1";
-		String fullShardIdHex = "0x1";
-		GetMinorBlock mBlock = web3.getMinorBlockByHeight(Numeric.toBigInt(fullShardIdHex), Numeric.toBigInt(h), true).send();
+		String h = "0x1"; 
+		GetMinorBlock mBlock = web3.getMinorBlockByHeight(BigInteger.valueOf(1), Numeric.toBigInt(h), true).sendAsync().get();
 		if (mBlock.getBlock().isPresent()) {
 			GetMinorBlock.MinorBlock block = mBlock.getBlock().get();
 			System.out.println("getMinorBlockByHeight:" + block);
@@ -308,6 +307,8 @@ public class Sample {
 			String root = confirmingRoot.getRootHash();
 			System.out.println(
 					"getRootHashConfirmingMinorBlockById: root block " + root + " includes minor block " + mbid);
+		}else {
+			System.out.println("getMinorBlockByHeight: not found");
 		}
 
 		// deploy contract with constructor argument 2000000000000000

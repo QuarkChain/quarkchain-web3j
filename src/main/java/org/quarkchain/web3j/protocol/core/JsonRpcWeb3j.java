@@ -96,13 +96,14 @@ public class JsonRpcWeb3j implements Web3j {
 	}
 
 	@Override
-	public Request<?, GetMinorBlock> getMinorBlockByHeight(BigInteger fullShardId, BigInteger blockNumber, boolean withTx) { 
+	public Request<?, GetMinorBlock> getMinorBlockByHeight(BigInteger fullShardId, BigInteger blockNumber, boolean withTx) {
+		String fullShardIdHex = Numeric.encodeQuantity(fullShardId);
 		if (blockNumber == null) {
-			return new Request<>("getMinorBlockByHeight", Arrays.asList(fullShardId, null, withTx), ID, web3jService,
+			return new Request<>("getMinorBlockByHeight", Arrays.asList(fullShardIdHex, null, withTx), ID, web3jService,
 					GetMinorBlock.class);
 		}
 		return new Request<>("getMinorBlockByHeight",
-				Arrays.asList(fullShardId, Numeric.toHexStringWithPrefix(blockNumber), withTx), ID, web3jService,
+				Arrays.asList(fullShardIdHex, Numeric.toHexStringWithPrefix(blockNumber), withTx), ID, web3jService,
 				GetMinorBlock.class);
 	}
 
