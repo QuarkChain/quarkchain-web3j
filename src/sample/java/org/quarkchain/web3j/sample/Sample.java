@@ -51,8 +51,11 @@ public class Sample {
 	public static final String PRIVATE_KEY = "ca0143c9aa51c3013f08e83f3b6368a4f3ba5b52c4841c6e0c22c300f7ee6827";
 	// 64 byte hex value
 	public static final String PUBLIC_KEY = "0x9f0d6b3a0775412ca4c9b880c8cef9132b23198b5ef443685a54d36c3fa23a8ca127b7f0764b2e88849de947ca5f44a309617f86fc73a1559e276d437c7453ff";
+
+	static String fullShardKey = "0x00020000";
 	// 24 byte hex address - must have 0x prefix
-	public static final String FROM_ADDRESS = "0xb067ac9ebeeecb10bbcd1088317959d58d1e38f600000000";
+	public static final String FROM_ADDRESS = "0xb067ac9ebeeecb10bbcd1088317959d58d1e38f6"
+			+ Numeric.cleanHexPrefix(fullShardKey);
 	// 20 byte hex value
 	public static final String TO_ADDRESS = "0xfee3d08216f0bfe96a5c0f5df9ec9b2577ad64f0";
 
@@ -74,7 +77,6 @@ public class Sample {
 		System.out.println("networkInfo=" + networkInfo);
 		String networkId = networkInfo.getNetworkId();
 
-		String fullShardKey = "0x00000000";
 		BigInteger value = Convert.toWei("0.01", Convert.Unit.ETHER).toBigInteger();
 		EvmTransaction evmTransaction = EvmTransaction.createQKCThansferTransaction(nonce, GAS_PRICE, GAS_LIMIT,
 				TO_ADDRESS, value, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID);
@@ -102,7 +104,7 @@ public class Sample {
 		NetworkInfo network = devnet.networkInfo().send();
 		Info networkInfo = network.getResult();
 		String networkId = networkInfo.getNetworkId();
-		String fullShardKey = "0x00000000";
+
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractTransaction(nonce, GAS_PRICE, GAS_LIMIT,
 				networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID, CONTRACT_BYTECODE + params);
 		evmTransaction.sign(KEY_PAIR);
@@ -164,7 +166,6 @@ public class Sample {
 		data = data + param0 + param1;
 		System.out.println("transfer() data=" + data);
 
-		String fullShardKey = "0x00000000";
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractFunctionCallTransaction(nonce, GAS_PRICE,
 				GAS_LIMIT, address, BigInteger.ZERO, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID,
 				DEFAULT_TOKEN_ID, data);
@@ -194,7 +195,6 @@ public class Sample {
 		String data = FunctionEncoder.encode(function);
 		System.out.println("setName data=" + data);
 
-		String fullShardKey = "0x00000000";
 		EvmTransaction evmTransaction = EvmTransaction.createSmartContractFunctionCallTransaction(nonce, GAS_PRICE,
 				GAS_LIMIT, address, BigInteger.ZERO, networkId, fullShardKey, fullShardKey, DEFAULT_TOKEN_ID,
 				DEFAULT_TOKEN_ID, data);
@@ -231,7 +231,7 @@ public class Sample {
 				qkcAddress);
 		String encodedEvent = TransactionHelper.encodeEvent("Transfer(address,address,uint256)");
 		ethFilter.addSingleTopic(encodedEvent);
-		EthLog ethLog = web3.getLogs(ethFilter, "0x00000000").send();
+		EthLog ethLog = web3.getLogs(ethFilter, fullShardKey).send();
 		if (ethLog.getError() != null) {
 			throw new Exception(ethLog.getError().getMessage());
 		}
@@ -283,22 +283,16 @@ public class Sample {
 			return;
 		}
 
-		// estimateGas
-		EstimateGas est = web3.estimateGas(
-				new TransactionReq(FROM_ADDRESS, TO_ADDRESS + "00000000", "", DEFAULT_TOKEN_ID, DEFAULT_TOKEN_ID))
-				.send();
-		BigInteger estGas = est.getAmountUsed();
-		System.out.println("Estimated gas=" + estGas);
-
 		// sendRawTransaction
 		TransactionReceipt transactionReceipt = transferQKC(web3);
 		System.out.println("transferQKC status=" + transactionReceipt.getStatus());
 		String txId = transactionReceipt.getTransactionId();
 
 		// getMinorBlockByHeight
-//		String h = transactionReceipt.getBlockHeight();
-		String h = "0x1"; 
-		GetMinorBlock mBlock = web3.getMinorBlockByHeight(BigInteger.valueOf(1), Numeric.toBigInt(h), true).sendAsync().get();
+		String h = transactionReceipt.getBlockHeight();
+//		String h = "0x1"; 
+		GetMinorBlock mBlock = web3.getMinorBlockByHeight(BigInteger.valueOf(1), Numeric.toBigInt(h), true).sendAsync()
+				.get();
 		if (mBlock.getBlock().isPresent()) {
 			GetMinorBlock.MinorBlock block = mBlock.getBlock().get();
 			System.out.println("getMinorBlockByHeight:" + block);
@@ -307,7 +301,7 @@ public class Sample {
 			String root = confirmingRoot.getRootHash();
 			System.out.println(
 					"getRootHashConfirmingMinorBlockById: root block " + root + " includes minor block " + mbid);
-		}else {
+		} else {
 			System.out.println("getMinorBlockByHeight: not found");
 		}
 
