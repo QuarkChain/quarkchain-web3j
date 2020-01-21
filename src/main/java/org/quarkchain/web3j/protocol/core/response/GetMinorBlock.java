@@ -8,6 +8,10 @@ import java.util.Optional;
 
 import org.quarkchain.web3j.protocol.ObjectMapperFactory;
 import org.quarkchain.web3j.protocol.core.Response;
+import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.protocol.core.methods.response.EthBlock.TransactionHash;
+import org.web3j.protocol.core.methods.response.EthBlock.TransactionObject;
+import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -245,24 +249,37 @@ public class GetMinorBlock extends Response<GetMinorBlock.MinorBlock> {
 
 	}
 
-	public static class TransactionDeserialiser extends JsonDeserializer<List<TransactionRes>> {
+	public static class TransactionDeserialiser extends JsonDeserializer<List<TransactionResult>> {
 
 		private ObjectReader objectReader = ObjectMapperFactory.getObjectReader();
 
 		@Override
-		public List<TransactionRes> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
+		public List<TransactionResult> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
 				throws IOException {
 
-			List<TransactionRes> transactionResults = new ArrayList<>();
+			List<TransactionResult> transactionResults = new ArrayList<>();
 			JsonToken nextToken = jsonParser.nextToken();
 			if (nextToken == JsonToken.END_ARRAY) {
 				return transactionResults;
 			}
-			Iterator<TransactionRes> transactionObjectIterator = objectReader.readValues(jsonParser,
-					TransactionRes.class);
-			while (transactionObjectIterator.hasNext()) {
-				transactionResults.add(transactionObjectIterator.next());
+
+			if (nextToken == JsonToken.START_OBJECT) {
+
+				Iterator<TransactionObject> transactionObjectIterator = objectReader.readValues(jsonParser,
+						TransactionObject.class);
+				while (transactionObjectIterator.hasNext()) {
+					transactionResults.add(transactionObjectIterator.next());
+				}
+			} else if (nextToken == JsonToken.VALUE_STRING) {
+				jsonParser.getValueAsString();
+
+				Iterator<TransactionHash> transactionHashIterator = objectReader.readValues(jsonParser,
+						TransactionHash.class);
+				while (transactionHashIterator.hasNext()) {
+					transactionResults.add(transactionHashIterator.next());
+				}
 			}
+
 			return transactionResults;
 		}
 	}
@@ -279,6 +296,59 @@ public class GetMinorBlock extends Response<GetMinorBlock.MinorBlock> {
 			} else {
 				return null; // null is wrapped by Optional in above getter
 			}
+		}
+	}
+
+	public interface TransactionResult<T> {
+		T get();
+	}
+
+	public static class TransactionObject extends TransactionRes implements TransactionResult<TransactionRes> {
+		public TransactionObject() {
+		}
+
+		@Override
+		public TransactionRes get() {
+			return this;
+		}
+	}
+
+	public static class TransactionHash implements TransactionResult<String> {
+		private String value;
+
+		public TransactionHash() {
+		}
+
+		public TransactionHash(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String get() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (!(o instanceof TransactionHash)) {
+				return false;
+			}
+
+			TransactionHash that = (TransactionHash) o;
+
+			return value != null ? value.equals(that.value) : that.value == null;
+		}
+
+		@Override
+		public int hashCode() {
+			return value != null ? value.hashCode() : 0;
 		}
 	}
 }

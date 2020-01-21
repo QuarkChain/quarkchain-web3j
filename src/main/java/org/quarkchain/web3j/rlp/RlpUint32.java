@@ -1,7 +1,6 @@
 package org.quarkchain.web3j.rlp;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 public class RlpUint32 implements RlpType {
 	private static final int UINT32_OFFSET = 0x84;
@@ -16,9 +15,10 @@ public class RlpUint32 implements RlpType {
 	public byte[] encode() {
 		byte[] result = new byte[UINT32_LENGTH];
 		result[0] = (byte) (UINT32_OFFSET);
-		BigInteger bigInt = BigInteger.valueOf(this.value);
-		byte[] bytesValue = bigInt.toByteArray();
-		System.arraycopy(bytesValue, 0, result, 1, bytesValue.length);
+		result[1] = (byte)(this.value >> 24);
+		result[2] = (byte)(this.value >> 16);
+		result[3] = (byte)(this.value >> 8);
+		result[4] = (byte)(this.value);  
 		return result;
 	}
 
@@ -27,7 +27,7 @@ public class RlpUint32 implements RlpType {
 		if (value.signum() < 1) {
 			return new RlpUint32(0);
 		} else {
-			return new RlpUint32(value.intValue());
+			return new RlpUint32(value.intValue() & 0x0FFFFFFFF);
 		}
 	}
 
