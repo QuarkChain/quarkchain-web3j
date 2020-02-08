@@ -42,8 +42,8 @@ public class HttpService implements Web3jService {
 	public <T extends Response> T send(Request request, Class<T> responseType) throws IOException {
 
 		byte[] payload = objectMapper.writeValueAsBytes(request);
-		String payloadS = objectMapper.writeValueAsString(request);
-		System.out.println("payload=" + payloadS);
+//		String payloadS = objectMapper.writeValueAsString(request);
+//		System.out.println("payload=" + payloadS);
 		HttpPost httpPost = new HttpPost(this.url);
 		httpPost.setEntity(new ByteArrayEntity(payload));
 		httpPost.setHeader("Content-Type", "application/json; charset=UTF-8");
