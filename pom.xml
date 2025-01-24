@@ -39,7 +39,7 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-		<!-- used by sample -->
+			<!-- used by sample -->
 			<groupId>org.web3j</groupId>
 			<artifactId>core</artifactId>
 			<version>4.5.5</version>
@@ -49,6 +49,6 @@
 			<artifactId>junit-jupiter</artifactId>
 			<version>5.7.0</version>
 			<scope>test</scope>
-    	</dependency>
+		</dependency>
 	</dependencies>
 </project>
