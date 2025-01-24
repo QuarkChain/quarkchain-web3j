@@ -13,7 +13,6 @@ import org.quarkchain.web3j.rlp.RlpType;
 import org.quarkchain.web3j.rlp.RlpUint32;
 import org.quarkchain.web3j.utils.Numeric;
 
-
 public class TransactionEncoder {
 
 	public static SignatureData signMessage(TxDataUnsigned rawTransaction, ECKeyPair keyPair) {
@@ -73,11 +72,11 @@ public class TransactionEncoder {
 		// an empty to address (contract creation) should not be encoded as a numeric 0
 		// value
 		String to = txData.getTo();
-        if (to != null && to.length() > 0) {
-            result.add(RlpString.create(Numeric.hexStringToByteArray(to)));
-        } else {
-            result.add(RlpString.create(""));
-        }
+		if (to != null && to.length() > 0) {
+			result.add(RlpString.create(Numeric.hexStringToByteArray(to)));
+		} else {
+			result.add(RlpString.create(""));
+		}
 		result.add(RlpString.create(txData.getValue()));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getInput())));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getNetworkId())));
