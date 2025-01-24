@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.quarkchain</groupId>
 	<artifactId>web3j</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<inceptionYear>2019</inceptionYear>
 	<licenses>
 		<license>
@@ -44,5 +44,11 @@
 			<artifactId>core</artifactId>
 			<version>4.5.5</version>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.7.0</version>
+			<scope>test</scope>
+    	</dependency>
 	</dependencies>
 </project>

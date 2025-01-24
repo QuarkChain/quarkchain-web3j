@@ -2,17 +2,17 @@ package org.quarkchain.web3j.crypto;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.quarkchain.web3j.crypto.Sign.SignatureData;
 import org.quarkchain.web3j.protocol.core.request.EvmTransaction;
-import org.quarkchain.web3j.protocol.core.request.TxData;
 import org.quarkchain.web3j.protocol.core.request.EvmTransaction.TxDataUnsigned;
+import org.quarkchain.web3j.protocol.core.request.TxData;
 import org.quarkchain.web3j.rlp.RlpEncoder;
 import org.quarkchain.web3j.rlp.RlpList;
 import org.quarkchain.web3j.rlp.RlpString;
 import org.quarkchain.web3j.rlp.RlpType;
 import org.quarkchain.web3j.rlp.RlpUint32;
 import org.quarkchain.web3j.utils.Numeric;
+
 
 public class TransactionEncoder {
 
@@ -73,11 +73,11 @@ public class TransactionEncoder {
 		// an empty to address (contract creation) should not be encoded as a numeric 0
 		// value
 		String to = txData.getTo();
-		if (to.length() > 0) {
-			result.add(RlpString.create(Numeric.toBigInt(to)));
-		} else {
-			result.add(RlpString.create(""));
-		}
+        if (to != null && to.length() > 0) {
+            result.add(RlpString.create(Numeric.hexStringToByteArray(to)));
+        } else {
+            result.add(RlpString.create(""));
+        }
 		result.add(RlpString.create(txData.getValue()));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getInput())));
 		result.add(RlpString.create(Numeric.hexStringToByteArray(txData.getNetworkId())));
@@ -90,5 +90,9 @@ public class TransactionEncoder {
 		result.add(RlpString.create(txData.getR()));
 		result.add(RlpString.create(txData.getS()));
 		return result;
+	}
+
+	public static List<RlpType> asRlpValuesPub(EvmTransaction evmTransaction) {
+		return asRlpValues(evmTransaction);
 	}
 }
